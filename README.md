@@ -57,7 +57,7 @@ We normalize the response using normalizr, then define the reducer dependencies.
 
 ```js
 import axios from 'axios'
-import configureDataDispatch from 'redux-data-dispatch
+import configureDataDispatch from 'redux-data-dispatch'
 import { normalize, schema } from 'normalizr'
 import { store } from '../store.js'
 
