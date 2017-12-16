@@ -96,6 +96,13 @@ describe('listenFor', () => {
 describe('setupTree', () => {
   const { setupTree } = dataTree
 
+  test('TypeError thrown when deps are not functions', () => {
+    // Set up redux tree
+    const tree = setupTree(mockStore({}))
+    // Send action
+    expect(() => tree({ type: 'FOO' }, { user: 'users' })).toThrowError(TypeError)
+  })
+
   test('is dispatches the original action', () => {
     // Initialise mockstore with empty state
     const store = mockStore({})
@@ -110,7 +117,7 @@ describe('setupTree', () => {
     expect(store.getActions()).toEqual([ action ])
   })
 
-  test('is dispatches dependent actions', () => {
+  test('it dispatches dependent actions', () => {
     // Initialise mockstore with empty state
     const store = mockStore({})
     // Set up redux tree
@@ -124,7 +131,7 @@ describe('setupTree', () => {
       payload: payload.entities.users
     }
     // Send action (use object containing to avoid checking symbols)
-    tree(action, { user: 'users' })
+    tree(action, { user: action => action.payload.entities.users })
     expect(store.getActions()).toEqual(
       expect.arrayContaining([ expect.objectContaining(depAction), expect.objectContaining(action) ])
     )
@@ -140,7 +147,7 @@ describe('setupTree', () => {
       payload
     }
     // Send action (use object containing to avoid checking symbols)
-    tree(action, { user: 'users' })
+    tree(action, { user: action => action.payload.entities.users })
     // Should contain an action that has DATA_TREE_ID
     expect(store.getActions()).toEqual(
       expect.arrayContaining([ expect.objectContaining({
