@@ -1,6 +1,7 @@
 /* globals describe, test, expect */
 
-const dataTree = require('../../index')
+import configureStore from 'redux-mock-store'
+import dataTree from '../../index'
 
 /**
  * Import Tests
@@ -27,13 +28,24 @@ function reducer (state = {}, action) {
   }
 }
 
-const payload = { 1: 'foo', 2: 'bar', 3: 'baz' }
+const payload = {
+  entities: {
+    users: { 1: 'foo', 2: 'bar', 3: 'baz' },
+    repos: {
+      1848: { owner: 1, name: 'spring' },
+      1574: { owner: 3, name: 'flower' },
+      1003: { owner: 2, name: 'waterfall' }
+    }
+  }
+}
 
 const _action = (type, payload) => ({
   [dataTree.DATA_TREE_ID]: true,
   type,
   payload
 })
+
+const mockStore = configureStore()
 
 /**
  * Tests
@@ -82,5 +94,59 @@ describe('listenFor', () => {
 })
 
 describe('setupTree', () => {
+  const { setupTree } = dataTree
 
+  test('is dispatches the original action', () => {
+    // Initialise mockstore with empty state
+    const store = mockStore({})
+    // Set up redux tree
+    const tree = setupTree(store)
+    const action = {
+      type: 'FOO',
+      payload
+    }
+    // Send action
+    tree(action, {})
+    expect(store.getActions()).toEqual([ action ])
+  })
+
+  test('is dispatches dependent actions', () => {
+    // Initialise mockstore with empty state
+    const store = mockStore({})
+    // Set up redux tree
+    const tree = setupTree(store)
+    const action = {
+      type: 'FOO',
+      payload
+    }
+    const depAction = {
+      type: Symbol.for('dataTree.user'),
+      payload: payload.entities.users
+    }
+    // Send action (use object containing to avoid checking symbols)
+    tree(action, { user: 'users' })
+    expect(store.getActions()).toEqual(
+      expect.arrayContaining([ expect.objectContaining(depAction), expect.objectContaining(action) ])
+    )
+  })
+
+  test('it creates dependent actions that have DATA_TREE_ID property', () => {
+    // Initialise mockstore with empty state
+    const store = mockStore({})
+    // Set up redux tree
+    const tree = setupTree(store)
+    const action = {
+      type: 'FOO',
+      payload
+    }
+    // Send action (use object containing to avoid checking symbols)
+    tree(action, { user: 'users' })
+    // Should contain an action that has DATA_TREE_ID
+    expect(store.getActions()).toEqual(
+      expect.arrayContaining([ expect.objectContaining({
+        [dataTree.DATA_TREE_ID]: true,
+        type: Symbol.for('dataTree.user')
+      }) ])
+    )
+  })
 })
