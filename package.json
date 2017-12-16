@@ -1,0 +1,27 @@
+{
+  "name": "redux-data-dispatch",
+  "version": "0.0.1",
+  "description": "Define data dependencies and links between reducers.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "redux",
+    "dependencies",
+    "data",
+    "state-management"
+  ],
+  "author": "Ben Hadfield <benjohnhadfield@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-jest": "^21.2.0",
+    "babel-preset-env": "^1.6.1",
+    "jest": "^21.2.1",
+    "standard": "^10.0.3"
+  },
+  "peerDependencies": {
+    "redux": "^3.0.0"
+  }
+}
