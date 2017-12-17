@@ -96,11 +96,11 @@ describe('listenFor', () => {
 describe('setupTree', () => {
   const { setupTree } = dataTree
 
-  test('TypeError thrown when deps are not functions', () => {
+  test('TypeError thrown when deps are not functions or strings', () => {
     // Set up redux tree
     const tree = setupTree(mockStore({}))
     // Send action
-    expect(() => tree({ type: 'FOO' }, { user: 'users' })).toThrowError(TypeError)
+    expect(() => tree({ type: 'FOO' }, { user: 5 })).toThrowError(TypeError)
   })
 
   test('is dispatches the original action', () => {
@@ -131,7 +131,7 @@ describe('setupTree', () => {
       payload: payload.entities.users
     }
     // Send action (use object containing to avoid checking symbols)
-    tree(action, { user: action => action.payload.entities.users })
+    tree(action, { user: 'payload.entities.users' })
     expect(store.getActions()).toEqual(
       expect.arrayContaining([ expect.objectContaining(depAction), expect.objectContaining(action) ])
     )

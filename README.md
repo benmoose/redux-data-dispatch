@@ -93,9 +93,9 @@ export const searchRepos = (search) => (dispatch) => {
     // Additionally, dispatch an action that will be
     // picked up by the reducer with the key `owner`.
     // The payload of that action will be, in this case,
-    // `action.payload.entities.owners`.
+    // `payload.entities.owners`.
     .then(res => dataDispatch(res, {
-      owner: action => action.payload.entities.owners
+      owner: 'payload.entities.owners'
     }))
 }
 ```
