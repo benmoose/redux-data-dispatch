@@ -81,8 +81,14 @@ describe('listenFor', () => {
   test('dataTree actions update state when called with the right key', () => {
     const _reducer = listenFor('key')(reducer)
     const key = Symbol.for('dataTree.key')
-    expect(_reducer({}, _action(key, payload))).toEqual({ entities: payload })
-    expect(_reducer({ _x: 5 }, _action(key, payload))).toEqual({ entities: payload, _x: 5 })
+    expect(_reducer(
+      {},                     // state
+      _action(key, payload))  // action
+    ).toEqual({ entities: payload })
+    expect(_reducer(
+      { _x: 5 },              // state
+      _action(key, payload))  // action
+    ).toEqual({ entities: payload, _x: 5 })
   })
 
   test('dataTree actions do not update state when called with the wrong key', () => {
@@ -96,7 +102,7 @@ describe('listenFor', () => {
 describe('setupTree', () => {
   const { setupTree } = dataTree
 
-  test('TypeError thrown when deps are not functions or strings', () => {
+  test('TypeError thrown when redux dependency values are not functions or strings', () => {
     // Set up redux tree
     const tree = setupTree(mockStore({}))
     // Send action
@@ -117,7 +123,7 @@ describe('setupTree', () => {
     expect(store.getActions()).toEqual([ action ])
   })
 
-  test('it dispatches dependent actions', () => {
+  test('it dispatches dependent actions correctly with string dependency', () => {
     // Initialise mockstore with empty state
     const store = mockStore({})
     // Set up redux tree
@@ -130,8 +136,28 @@ describe('setupTree', () => {
       type: Symbol.for('dataTree.user'),
       payload: payload.entities.users
     }
-    // Send action (use object containing to avoid checking symbols)
+    // Send action (use .objectContaining to avoid checking symbols)
     tree(action, { user: 'payload.entities.users' })
+    expect(store.getActions()).toEqual(
+      expect.arrayContaining([ expect.objectContaining(depAction), expect.objectContaining(action) ])
+    )
+  })
+
+  test('it dispatches dependent actions correctly with function dependency', () => {
+    // Initialise mockstore with empty state
+    const store = mockStore({})
+    // Set up redux tree
+    const tree = setupTree(store)
+    const action = {
+      type: 'FOO',
+      payload
+    }
+    const depAction = {
+      type: Symbol.for('dataTree.user'),
+      payload: payload.entities.users
+    }
+    // Send action (use .objectContaining to avoid checking symbols)
+    tree(action, { user: action => action.payload.entities.users })
     expect(store.getActions()).toEqual(
       expect.arrayContaining([ expect.objectContaining(depAction), expect.objectContaining(action) ])
     )
