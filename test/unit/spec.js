@@ -81,13 +81,13 @@ describe('listenFor', () => {
   test('dataTree actions update state when called with the right key', () => {
     const _reducer = listenFor('key')(reducer)
     const key = Symbol.for('dataTree.key')
-    expect(_reducer({}, _action(key, payload))).toEqual({ payload })
-    expect(_reducer({ _x: 5 }, _action(key, payload))).toEqual({ payload, _x: 5 })
+    expect(_reducer({}, _action(key, payload))).toEqual({ entities: payload })
+    expect(_reducer({ _x: 5 }, _action(key, payload))).toEqual({ entities: payload, _x: 5 })
   })
 
   test('dataTree actions do not update state when called with the wrong key', () => {
     const _reducer = listenFor('key')(reducer)
-    const key = Symbol.for('__dataTree.yek__')
+    const key = Symbol.for('otherKey')
     expect(_reducer({}, _action(key, payload))).toEqual({})
     expect(_reducer({ _x: 5 }, _action(key, payload))).toEqual({ _x: 5 })
   })
