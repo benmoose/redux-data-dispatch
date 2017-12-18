@@ -41,8 +41,6 @@ export const setupTree = (store) => {
         throw new TypeError('Dependent reducer values must be either a function or a string, but got ' + typeof deps[key] + ' for ' + key)
       }
     })
-    // Dispatch the action
-    store.dispatch(action)
     // Dispatch any dependent actions
     Object.keys(deps).map(key => {
       const subAction = {
@@ -54,6 +52,8 @@ export const setupTree = (store) => {
       }
       store.dispatch(subAction)
     })
+    // Dispatch the original action
+    store.dispatch(action)
     // Return the original action
     return action
   }
