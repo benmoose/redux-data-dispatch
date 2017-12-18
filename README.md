@@ -91,10 +91,10 @@ export const getRepos = (repoName) => (dispatch) => {
     .then(res => normalize(res.data, { item: [repo] }))
     // dataDispatch will dispatch the `getReposSuccess` action, and make
     // additional dispatches as defined by our dependency mapping.
-    .then(res => {
+    .then(normalized => {
       dataDispatch(
         // action to dispatch
-        getReposSuccess(normalize(res.data, { item: [repo] })),
+        getReposSuccess(normalized),
         // make dispatch that is picked up by `owner` reducer. Action has payload
         // set to value of the original action's `payload.entities.owners`
         // property.
