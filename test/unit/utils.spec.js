@@ -1,6 +1,6 @@
 /* globals describe, test, expect */
 
-import { dotCaseToObjectProperty } from '../../lib/utils'
+import { dotCaseToObjectProperty } from '../../src/utils'
 
 describe('test dotCaseToObjectProperty', () => {
   const obj = {

@@ -1,7 +1,7 @@
 /* globals describe, test, expect */
 
 import configureStore from 'redux-mock-store'
-import dataTree from '../../index'
+import setupTree, { listenFor, DATA_TREE_ID } from '../../src'
 
 /**
  * Import Tests
@@ -9,10 +9,10 @@ import dataTree from '../../index'
 
 describe('Library exports', () => {
   test('Functions are exported', () => {
-    expect(dataTree.default).toBeInstanceOf(Function)
-    expect(dataTree.setupTree).toBeInstanceOf(Function)
-    expect(dataTree.listenFor).toBeInstanceOf(Function)
-    expect(dataTree.DATA_TREE_ID).not.toBeUndefined()
+    expect(require('../../index').default).toBeInstanceOf(Function)
+    expect(require('../../index').setupTree).toBeInstanceOf(Function)
+    expect(require('../../index').listenFor).toBeInstanceOf(Function)
+    expect(require('../../index').DATA_TREE_ID).not.toBeUndefined()
   })
 })
 
@@ -40,7 +40,7 @@ const payload = {
 }
 
 const _action = (type, payload) => ({
-  [dataTree.DATA_TREE_ID]: true,
+  [DATA_TREE_ID]: true,
   type,
   payload
 })
@@ -52,8 +52,6 @@ const mockStore = configureStore()
  */
 
 describe('listenFor', () => {
-  const { listenFor } = dataTree
-
   test('it throws TypeError when key is not a string', () => {
     function withNumber () { listenFor(4) }
     function withBoolean () { listenFor(true) }
@@ -100,8 +98,6 @@ describe('listenFor', () => {
 })
 
 describe('setupTree', () => {
-  const { setupTree } = dataTree
-
   test('TypeError thrown when redux dependency values are not functions or strings', () => {
     // Set up redux tree
     const tree = setupTree(mockStore({}))
@@ -177,7 +173,7 @@ describe('setupTree', () => {
     // Should contain an action that has DATA_TREE_ID
     expect(store.getActions()).toEqual(
       expect.arrayContaining([ expect.objectContaining({
-        [dataTree.DATA_TREE_ID]: true,
+        [DATA_TREE_ID]: true,
         type: Symbol.for('dataTree.user')
       }) ])
     )

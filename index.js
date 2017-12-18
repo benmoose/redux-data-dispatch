@@ -1,1 +1,1 @@
-module.exports = require('./lib/reduxDataTree')
+module.exports = require('./lib')
