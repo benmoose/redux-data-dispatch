@@ -1,6 +1,6 @@
 {
   "name": "redux-data-dispatch",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Define data dependencies and links between reducers.",
   "main": "index.js",
   "scripts": {
