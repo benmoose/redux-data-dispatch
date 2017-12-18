@@ -1,6 +1,13 @@
 {
   "name": "redux-data-dispatch",
   "version": "0.2.4",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benjaminhadfield/redux-data-dispatch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/benjaminhadfield/redux-data-dispatch/issues"
+  },
   "description": "Define data dependencies and links between reducers.",
   "main": "index.js",
   "scripts": {

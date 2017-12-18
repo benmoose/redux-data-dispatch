@@ -133,7 +133,7 @@ export default listenFor('owner')(reducer)
 
 ## API
 
-#### configureDataDispatch `function`
+### configureDataDispatch `function`
 
 ```js
 import configureDataDispatch from 'redux-data-dispatch'
@@ -164,7 +164,7 @@ const store = createStore()
 const dataDispatch = configureDataDispatch(store)
 ```
 
-#### listenFor `function`
+### listenFor `function`
 
 ```js
 import { listenFor } from 'redux-data-dispatch'
