@@ -1,5 +1,8 @@
 # Reux Data Dispatch
 
+[![Build Status](https://travis-ci.org/benjaminhadfield/redux-data-dispatch.svg?branch=master)](https://travis-ci.org/benjaminhadfield/redux-data-dispatch)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
 An enhancer to redux reducers that makes it easy to define dependend reducers to store data returned by a single action. This promotes a modular redux design where each reducer is responsible for storing one type of data.
 
 This package assumes you work with `normalizr`.
