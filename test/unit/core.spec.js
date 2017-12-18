@@ -178,4 +178,19 @@ describe('setupTree', () => {
       }) ])
     )
   })
+
+  test('it dispatches the original action last', () => {
+    // Initialise mockstore with empty state
+    const store = mockStore({})
+    // Set up redux tree
+    const tree = setupTree(store)
+    const action = {
+      type: 'FOO',
+      payload
+    }
+    // Send action (use object containing to avoid checking symbols)
+    tree(action, { user: action => action.payload.entities.users })
+    // Should contain an action that has DATA_TREE_ID
+    expect(store.getActions().slice(-1)[0]).toEqual(action)
+  })
 })
