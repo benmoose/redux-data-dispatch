@@ -101,20 +101,29 @@ describe('setupTree', () => {
   test('TypeError thrown when redux dependency values are not functions or strings', () => {
     // Set up redux tree
     const store = mockStore({})
+    // Create action
+    const action = {
+      type: 'FOO',
+      meta: {
+        deps: { user: 5 }
+      }
+    }
     // Send action
-    expect(() => store.dispatch({ type: 'FOO' }, { user: 5 })).toThrowError(TypeError)
+    expect(() => store.dispatch(action)).toThrowError(TypeError)
   })
 
-  test('is dispatches the original action', () => {
+  test('TypeError thrown when deps key is not an object', () => {
     // Initialise mockstore with empty state
     const store = mockStore({})
     const action = {
       type: 'FOO',
-      payload
+      payload,
+      meta: {
+        deps: 'foo'
+      }
     }
-    // Send action
-    store.dispatch(action, {})
-    expect(store.getActions()).toEqual([ action ])
+    // Send erroneous action
+    expect(() => store.dispatch(action)).toThrowError(TypeError)
   })
 
   test('it dispatches dependent actions correctly with string dependency', () => {
@@ -122,14 +131,17 @@ describe('setupTree', () => {
     const store = mockStore({})
     const action = {
       type: 'FOO',
-      payload
+      payload,
+      meta: {
+        deps: { user: 'payload.entities.users' }
+      }
     }
     const depAction = {
       type: Symbol.for('dataTree.user'),
       payload: payload.entities.users
     }
     // Send action (use .objectContaining to avoid checking symbols)
-    store.dispatch(action, { user: 'payload.entities.users' })
+    store.dispatch(action)
     expect(store.getActions()).toEqual(
       expect.arrayContaining([ expect.objectContaining(depAction), expect.objectContaining(action) ])
     )
@@ -140,14 +152,17 @@ describe('setupTree', () => {
     const store = mockStore({})
     const action = {
       type: 'FOO',
-      payload
+      payload,
+      meta: {
+        deps: { user: action => action.payload.entities.users }
+      }
     }
     const depAction = {
       type: Symbol.for('dataTree.user'),
       payload: payload.entities.users
     }
     // Send action (use .objectContaining to avoid checking symbols)
-    store.dispatch(action, { user: action => action.payload.entities.users })
+    store.dispatch(action)
     expect(store.getActions()).toEqual(
       expect.arrayContaining([ expect.objectContaining(depAction), expect.objectContaining(action) ])
     )
@@ -158,10 +173,13 @@ describe('setupTree', () => {
     const store = mockStore({})
     const action = {
       type: 'FOO',
-      payload
+      payload,
+      meta: {
+        deps: { user: action => action.payload.entities.users }
+      }
     }
     // Send action (use object containing to avoid checking symbols)
-    store.dispatch(action, { user: action => action.payload.entities.users })
+    store.dispatch(action)
     // Should contain an action that has DATA_TREE_ID
     expect(store.getActions()).toEqual(
       expect.arrayContaining([ expect.objectContaining({
@@ -176,10 +194,13 @@ describe('setupTree', () => {
     const store = mockStore({})
     const action = {
       type: 'FOO',
-      payload
+      payload,
+      meta: {
+        deps: { user: 'payload.entities.users' }
+      }
     }
     // Send action (use object containing to avoid checking symbols)
-    store.dispatch(action, { user: action => action.payload.entities.users })
+    store.dispatch(action)
     // Should contain an action that has DATA_TREE_ID
     expect(store.getActions().slice(-1)[0]).toEqual(action)
   })

@@ -36,9 +36,9 @@ However, we want to keep repo specific data in the `repo` reducer and send
 `owner` data to the `owner` reducer.
 With **redux data dispatch** this is easy! 🤓
 
-```js
-// src/index.js
+###### `index.js`
 
+```js
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { createStore, applyMiddleware } from 'redux'
@@ -64,9 +64,9 @@ ReactDOM.render(
 )
 ```
 
-```js
-// src/services/repo/actions.js
+###### `repo/actions.js`
 
+```js
 import axios from 'axios'
 import { repo } from './schema'
 
@@ -75,40 +75,43 @@ export const GET_REPOS_REQUEST = 'GET_REPOS_REQUEST'
 export const GET_REPOS_SUCCESS = 'GET_REPOS_SUCCESS'
 export const GET_REPOS_FAILURE = 'GET_REPOS_FAILURE'
 
-// action creators
-const getReposRequest = () => ({ type: GET_REPOS_REQUEST })
-const getReposSuccess = payload => ({ type: GET_REPOS_SUCCESS, payload })
-const getReposFailure = payload => ({ type: GET_REPOS_FAILURE, error: true, payload })
-
-// action to get repos from github
+// action to search github repos
 export const getRepos = (repoName) => (dispatch) => {
-  dispatch(getReposRequest())
+  dispatch({ type: GET_REPOS_REQUEST })
   return axios.get('https://api.github.com/search/repositories', {
     params: { q: repoName }
   })
-    // normalize the response to get response data in shape:
-    // {
-    //   entities: { repos: {...}, owners: {...} },
-    //   result: [...]
-    // }
-    .then(res => normalize(res.data, { item: [repo] }))
-    // dataDispatch will dispatch the `getReposSuccess` action, and make
-    // additional dispatches as defined by our dependency mapping
-    .then(normalised => dispatch(
-      // action to dispatch
-      getReposSuccess(normalised),
-      // Keys: specify which reducer to also send actions to
-      // Values: specify which subset of the action to send in the payload to
-      // the reducer
-      { owner: 'payload.entities.owners' })
+    .then(res => (
+      // normalize the response to get response data in shape:
+      // {
+      //   entities: { repos: {...}, owners: {...} },
+      //   result: [...]
+      // }
+      normalize(res.data, { item: [repo] }))
     )
-    .catch(err => dispatch(getReposFailure(err)))
+    .then(normalised => dispatch({
+      // dispatch the action as normal...
+      type: GET_REPOS_SUCCESS,
+      payload: normalised,
+      // ...and to send to other reducers, just add a `deps` key
+      // to the `action.meta` object
+      meta: {
+        // keys:   specify which reducer to send an action to
+        // values: select which data in this action to send
+        deps: { owner: 'payload.entities.owners' }
+      }
+    }))
+    .catch(err => dispatch({
+      type: GET_REPOS_FAILURE,
+      payload: err,
+      error: true
+    }))
 }
 ```
 
-```js
-// src/services/owner/reducer.js
+###### `owner/reducer.js`
 
+```js
 import { listenFor } from 'redux-data-dispatch'
 
 const initialState = {
@@ -157,10 +160,14 @@ applyMiddleware([dataDispatch])
 // object specifying which reducers and payload to call as a second argument
 // to dispatch
 const doSomething = () => dispatch => {
-  dispatch(
-    { type: 'FOO', action: { a: 1, b: 2 } },
-    { otherReducer: 'action.b' }
-  )
+  dispatch({
+    type: 'FOO',
+    payload: { a: 1, b: 2 },
+    meta: {
+      deps: { reducerKey: 'payload.b' }
+      // ...or: deps: { reducerKey: action => action.payload.b }
+    }
+  })
 }
 ```
 
