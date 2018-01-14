@@ -15,7 +15,7 @@
     "pretest": "npm run build",
     "test": "jest",
     "preversion": "npm test",
-    "postversion": "git push && git push --tags"
+    "postversion": "git add -u && git commit && git push && git push --tags"
   },
   "keywords": [
     "redux",
