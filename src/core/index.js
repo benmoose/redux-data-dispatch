@@ -60,8 +60,8 @@ const _hasDependencyMapping = action => action.meta && action.meta[DEPS_META_KEY
  */
 export const dataDispatch = store => next => action => {
   if (_hasDependencyMapping(action)) {
-    const deps = action.meta[DEPS_META_KEY]
     _assertDependencyObjectValid(action)
+    const deps = action.meta[DEPS_META_KEY]
     // Call dependent actions
     Object.keys(action.meta.deps).map((key) => {
       const subAction = {
