@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/benjaminhadfield/redux-data-dispatch.svg?branch=master)](https://travis-ci.org/benjaminhadfield/redux-data-dispatch)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
-An enhancer to redux reducers that makes it easy to define dependend reducers to store data returned by a single action. This promotes a modular redux design where each reducer is responsible for storing one type of data.
+An enhancer to redux reducers that makes it easy to define dependent reducers to store data returned by a single action. This promotes a modular redux design where each reducer is responsible for storing one type of data.
 
 This package works best when used in conjunction with [Normalizr](https://github.com/paularmstrong/normalizr).
 
@@ -49,15 +49,15 @@ import reducer from './reducer'
 import App from './App'
 
 // Setup the store with middleware
-const store = createStore(
+const store = (initialState) => createStore(
   reducer,
-  undefined,
+  initialState,
   applyMiddleware(dataDispatch)
 )
 
 // Render the app
 ReactDOM.render(
-  <Provider store={store}>
+  <Provider store={store()}>
     <App />
   </Provider>,
   document.getElementById('root')
@@ -67,8 +67,7 @@ ReactDOM.render(
 ```js
 // src/services/repo/actions.js
 
-// import dataDispatch from index.js
-import api from '../api'
+import axios from 'axios'
 import { repo } from './schema'
 
 // action types
@@ -84,8 +83,7 @@ const getReposFailure = payload => ({ type: GET_REPOS_FAILURE, error: true, payl
 // action to get repos from github
 export const getRepos = (repoName) => (dispatch) => {
   dispatch(getReposRequest())
-  return api({
-    url: `https://api.github.com/search/repositories`,
+  return axios.get('https://api.github.com/search/repositories', {
     params: { q: repoName }
   })
     // normalize the response to get response data in shape:
@@ -133,7 +131,7 @@ export default listenFor('owner')(reducer)
 
 ## API
 
-### dataDispatch `function`
+### `dataDispatch` `<function>`
 
 ```js
 import dataDispatch from 'redux-data-dispatch'
@@ -141,7 +139,7 @@ import dataDispatch from 'redux-data-dispatch'
 
 Supply to `applyMiddleware` to add data dispatch functionality to your app.
 
-##### Example
+#### Example
 
 ###### `store.js`
 
@@ -166,17 +164,17 @@ const doSomething = () => dispatch => {
 }
 ```
 
-### listenFor `function`
+### `listenFor` `<function>`
 
 ```js
 import { listenFor } from 'redux-data-dispatch'
 ```
 
-##### Arguments
+#### Arguments
 
- - `key` <`string`> a key that uniquely identifies this reducer.
+ - **`key`** `<string>`: a key that uniquely identifies this reducer.
 
-##### Returns
+#### Returns
 
 Returns a function that accepts the reducer to identify with `key`.
 
