@@ -1,6 +1,6 @@
 {
   "name": "redux-data-dispatch",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/benjaminhadfield/redux-data-dispatch.git"
