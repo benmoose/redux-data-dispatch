@@ -1,5 +1,6 @@
 # Reux Data Dispatch
 
+[![npm version](https://img.shields.io/npm/v/redux-data-dispatch.svg?style=flat-square)](https://badge.fury.io/js/redux-data-dispatch)
 [![Build Status](https://travis-ci.org/benjaminhadfield/redux-data-dispatch.svg?branch=master)](https://travis-ci.org/benjaminhadfield/redux-data-dispatch)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
@@ -40,16 +41,21 @@ With **redux data dispatch** this is easy! 🤓
 
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { createStore, applyMiddleware } from 'redux'
 import { Provider } from 'react-redux'
-import configureDataDispatch from 'redux-data-dispatch'
+import dataDispatch from 'redux-data-dispatch'
 
-import createStore from './store'
+import reducer from './reducer'
 import App from './App'
 
-// Setup the store and dataDispatch
-const store = createStore()
-export const dataDispatch = configureDataDispatch(store)
+// Setup the store with middleware
+const store = createStore(
+  reducer,
+  undefined,
+  applyMiddleware(dataDispatch)
+)
 
+// Render the app
 ReactDOM.render(
   <Provider store={store}>
     <App />
@@ -62,7 +68,6 @@ ReactDOM.render(
 // src/services/repo/actions.js
 
 // import dataDispatch from index.js
-import { dataDispatch } from '../../index'
 import api from '../api'
 import { repo } from './schema'
 
@@ -90,17 +95,15 @@ export const getRepos = (repoName) => (dispatch) => {
     // }
     .then(res => normalize(res.data, { item: [repo] }))
     // dataDispatch will dispatch the `getReposSuccess` action, and make
-    // additional dispatches as defined by our dependency mapping.
-    .then(normalized => {
-      dataDispatch(
-        // action to dispatch
-        getReposSuccess(normalized),
-        // make dispatch that is picked up by `owner` reducer. Action has payload
-        // set to value of the original action's `payload.entities.owners`
-        // property.
-        { owner: 'payload.entities.owners' }
-      ))
-    }
+    // additional dispatches as defined by our dependency mapping
+    .then(normalised => dispatch(
+      // action to dispatch
+      getReposSuccess(normalised),
+      // Keys: specify which reducer to also send actions to
+      // Values: specify which subset of the action to send in the payload to
+      // the reducer
+      { owner: 'payload.entities.owners' })
+    )
     .catch(err => dispatch(getReposFailure(err)))
 }
 ```
@@ -124,44 +127,43 @@ const reducer = (state = initialState, action) => {
   }
 }
 
-// Now calls the list `owner` as a dependency will recieve the specified payload
-// Currently, the action payload is just merged with '<reducer>.entities', future
-// versions will let you customise this.
-// Note, `owner` must match the dependency key defined in the `dataDispatch` call
+// Identify this reducer as `owner` in dataDispatch
 export default listenFor('owner')(reducer)
 ```
 
 ## API
 
-### configureDataDispatch `function`
+### dataDispatch `function`
 
 ```js
-import configureDataDispatch from 'redux-data-dispatch'
+import dataDispatch from 'redux-data-dispatch'
 ```
 
-##### Arguments
-
- - `store` <`object`> instance of your redux store
-
-##### Returns
-
-Returns a function that takes an action and a reducer dependency mapping and dispatches
-relevent actions. The function returns the original action.
-
-Dependency mapping has reducer keys as values and a `string` or `function` type as a value. The value should be a dotted string that selects a property from the action to be the payload of the dependency action. Or can be a function that accepts the action as a parameter and returns any value to be the payload.
-
-e.g. `{ user: 'payload.entities.users' }` or `{ user: action => action.payload.entities.users }`.
+Supply to `applyMiddleware` to add data dispatch functionality to your app.
 
 ##### Example
 
-```js
-import configureDataDispatch from 'redux-data-disaptch'
-import createStore from './store'
+###### `store.js`
 
-// Setup the store and dataDispatch
-const store = createStore()
-// Setup dataDispatch
-const dataDispatch = configureDataDispatch(store)
+```js
+import { applyMiddleware } from 'redux'
+import dataDispatch from 'redux-data-dispatch'
+
+applyMiddleware([dataDispatch])
+```
+
+###### `actions.js`
+
+```js
+// If you want an action to dispatch to other reducers then just add pass an
+// object specifying which reducers and payload to call as a second argument
+// to dispatch
+const doSomething = () => dispatch => {
+  dispatch(
+    { type: 'FOO', action: { a: 1, b: 2 } },
+    { otherReducer: 'action.b' }
+  )
+}
 ```
 
 ### listenFor `function`
@@ -176,7 +178,7 @@ import { listenFor } from 'redux-data-dispatch'
 
 ##### Returns
 
-Returns a function that accepts the reducer to connect to.
+Returns a function that accepts the reducer to identify with `key`.
 
 #### Example
 

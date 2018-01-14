@@ -1,7 +1,7 @@
 /* globals describe, test, expect */
 
 import configureStore from 'redux-mock-store'
-import setupTree, { listenFor, DATA_TREE_ID } from '../../src'
+import dataDispatch, { listenFor, DATA_TREE_ID } from '../../src'
 
 /**
  * Import Tests
@@ -10,8 +10,8 @@ import setupTree, { listenFor, DATA_TREE_ID } from '../../src'
 describe('Library exports', () => {
   test('Functions are exported', () => {
     expect(require('../../index').default).toBeInstanceOf(Function)
-    expect(require('../../index').setupTree).toBeInstanceOf(Function)
     expect(require('../../index').listenFor).toBeInstanceOf(Function)
+    expect(require('../../index').dataDispatch).toBeInstanceOf(Function)
     expect(require('../../index').DATA_TREE_ID).not.toBeUndefined()
   })
 })
@@ -45,7 +45,7 @@ const _action = (type, payload) => ({
   payload
 })
 
-const mockStore = configureStore()
+const mockStore = configureStore([dataDispatch])
 
 /**
  * Tests
@@ -100,30 +100,26 @@ describe('listenFor', () => {
 describe('setupTree', () => {
   test('TypeError thrown when redux dependency values are not functions or strings', () => {
     // Set up redux tree
-    const tree = setupTree(mockStore({}))
+    const store = mockStore({})
     // Send action
-    expect(() => tree({ type: 'FOO' }, { user: 5 })).toThrowError(TypeError)
+    expect(() => store.dispatch({ type: 'FOO' }, { user: 5 })).toThrowError(TypeError)
   })
 
   test('is dispatches the original action', () => {
     // Initialise mockstore with empty state
     const store = mockStore({})
-    // Set up redux tree
-    const tree = setupTree(store)
     const action = {
       type: 'FOO',
       payload
     }
     // Send action
-    tree(action, {})
+    store.dispatch(action, {})
     expect(store.getActions()).toEqual([ action ])
   })
 
   test('it dispatches dependent actions correctly with string dependency', () => {
     // Initialise mockstore with empty state
     const store = mockStore({})
-    // Set up redux tree
-    const tree = setupTree(store)
     const action = {
       type: 'FOO',
       payload
@@ -133,7 +129,7 @@ describe('setupTree', () => {
       payload: payload.entities.users
     }
     // Send action (use .objectContaining to avoid checking symbols)
-    tree(action, { user: 'payload.entities.users' })
+    store.dispatch(action, { user: 'payload.entities.users' })
     expect(store.getActions()).toEqual(
       expect.arrayContaining([ expect.objectContaining(depAction), expect.objectContaining(action) ])
     )
@@ -142,8 +138,6 @@ describe('setupTree', () => {
   test('it dispatches dependent actions correctly with function dependency', () => {
     // Initialise mockstore with empty state
     const store = mockStore({})
-    // Set up redux tree
-    const tree = setupTree(store)
     const action = {
       type: 'FOO',
       payload
@@ -153,7 +147,7 @@ describe('setupTree', () => {
       payload: payload.entities.users
     }
     // Send action (use .objectContaining to avoid checking symbols)
-    tree(action, { user: action => action.payload.entities.users })
+    store.dispatch(action, { user: action => action.payload.entities.users })
     expect(store.getActions()).toEqual(
       expect.arrayContaining([ expect.objectContaining(depAction), expect.objectContaining(action) ])
     )
@@ -162,14 +156,12 @@ describe('setupTree', () => {
   test('it creates dependent actions that have DATA_TREE_ID property', () => {
     // Initialise mockstore with empty state
     const store = mockStore({})
-    // Set up redux tree
-    const tree = setupTree(store)
     const action = {
       type: 'FOO',
       payload
     }
     // Send action (use object containing to avoid checking symbols)
-    tree(action, { user: action => action.payload.entities.users })
+    store.dispatch(action, { user: action => action.payload.entities.users })
     // Should contain an action that has DATA_TREE_ID
     expect(store.getActions()).toEqual(
       expect.arrayContaining([ expect.objectContaining({
@@ -182,14 +174,12 @@ describe('setupTree', () => {
   test('it dispatches the original action last', () => {
     // Initialise mockstore with empty state
     const store = mockStore({})
-    // Set up redux tree
-    const tree = setupTree(store)
     const action = {
       type: 'FOO',
       payload
     }
     // Send action (use object containing to avoid checking symbols)
-    tree(action, { user: action => action.payload.entities.users })
+    store.dispatch(action, { user: action => action.payload.entities.users })
     // Should contain an action that has DATA_TREE_ID
     expect(store.getActions().slice(-1)[0]).toEqual(action)
   })

@@ -1,4 +1,4 @@
-import { setupTree, listenFor, DATA_TREE_ID } from './core'
+import { dataDispatch, listenFor, DATA_TREE_ID } from './core'
 
-export { setupTree, listenFor, DATA_TREE_ID }
-export default setupTree
+export { dataDispatch, listenFor, DATA_TREE_ID }
+export default dataDispatch
